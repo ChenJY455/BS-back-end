@@ -1,6 +1,6 @@
-package Crawler;
+package Server.Crawler;
 
-import Goods.Goods;
+import Server.Entities.Goods;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jsoup.Jsoup;

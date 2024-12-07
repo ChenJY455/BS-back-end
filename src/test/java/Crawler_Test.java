@@ -1,7 +1,7 @@
-import Crawler.Crawler;
-import Crawler.TB;
-import Crawler.JD;
-import Goods.Goods;
+import Server.Crawler.Crawler;
+import Server.Crawler.TB;
+import Server.Crawler.JD;
+import Server.Entities.Goods;
 
 import java.util.List;
 

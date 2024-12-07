@@ -1,6 +1,6 @@
-package Crawler;
+package Server.Crawler;
 
-import Goods.Goods;
+import Server.Entities.Goods;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,7 +17,7 @@ import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import static Utils.Utils.getJsonObject16;
+import static Server.Utils.Utils.getJsonObject16;
 
 public class TB implements Crawler {
     private static String em_token = "";

@@ -1,6 +1,6 @@
-package Crawler;
+package Server.Crawler;
 
-import Goods.Goods;
+import Server.Entities.Goods;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

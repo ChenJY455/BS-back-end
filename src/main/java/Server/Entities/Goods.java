@@ -1,4 +1,4 @@
-package Goods;
+package Server.Entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
