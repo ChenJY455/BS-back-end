@@ -7,6 +7,5 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public interface Crawler {
-	List<Goods> GetGoodsList(String keyword)
-			throws NoSuchAlgorithmException, IOException, InterruptedException;
+	public List<? extends Goods> GetGoodsList(String keyword) throws NoSuchAlgorithmException, IOException, InterruptedException;
 }
