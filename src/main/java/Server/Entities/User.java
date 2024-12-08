@@ -10,7 +10,7 @@ import lombok.Data;
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	Integer id;
+	long uid;
 	@Column(unique = true, nullable = false)
 	String username;
 	@Column(nullable = false)

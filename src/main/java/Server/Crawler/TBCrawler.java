@@ -100,12 +100,12 @@ public class TBCrawler implements Crawler {
                 return null;
             }
             // Success
-            JSONObject data = (JSONObject) jsonObject.get("data");
-            JSONArray data_arr = (JSONArray) data.get("itemsArray");
+            JSONObject data = jsonObject.getJSONObject("data");
+            JSONArray data_arr = data.getJSONArray("itemsArray");
             for(int i = 0; i < data_arr.length(); i++) {
                 JSONObject good_obj = data_arr.getJSONObject(i);
-                JSONObject price_show = (JSONObject) good_obj.get("priceShow");
-                JSONObject shop_info = (JSONObject) good_obj.get("shopInfo");
+                JSONObject price_show = good_obj.getJSONObject("priceShow");
+                JSONObject shop_info = good_obj.optJSONObject("shopInfo");
                 goods_list.add(new TBGoods(
                         good_obj.getLong("item_id"),
                         good_obj.optString("pic_path"),
@@ -117,7 +117,7 @@ public class TBCrawler implements Crawler {
             }
             
             // Updata page args
-            JSONObject pageArgs = (JSONObject) data.get("mainInfo");
+            JSONObject pageArgs = data.getJSONObject("mainInfo");
             totalResults = pageArgs.optInt("totalResults");
             sourceS = pageArgs.optInt("sourceS");
             bcoffset = pageArgs.optInt("bcoffset");
