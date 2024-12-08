@@ -1,11 +1,31 @@
 package Server.Utils;
 
+import lombok.Getter;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
 public class Utils {
+	@Getter
+	public enum WebsiteType {
+		TB("TB"),
+		JD("JD");
+		
+		private final String website;
+		WebsiteType(String website) {
+			this.website = website;
+		}
+		
+		public static WebsiteType fromString(String website) {
+			for (WebsiteType type : WebsiteType.values()) {
+				if (type.getWebsite().equalsIgnoreCase(website)) {
+					return type;
+				}
+			}
+			throw new IllegalArgumentException("Unknown website: " + website);
+		}
+	}
 	private Utils() {
 		throw new UnsupportedOperationException("Utility class cannot be instantiated.");
 	}

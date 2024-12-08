@@ -112,7 +112,8 @@ public class TBCrawler implements Crawler {
                         good_obj.optString("title"),
                         price_show.optDouble("price"),
                         good_obj.optString("clickUrl"),
-                        shop_info.optString("title")
+                        shop_info.optString("title"),
+                        keyword
                 ));
             }
             

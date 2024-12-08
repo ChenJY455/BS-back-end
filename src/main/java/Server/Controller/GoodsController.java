@@ -1,10 +1,12 @@
 package Server.Controller;
 
+import Server.Entities.Goods;
 import Server.Service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,10 +17,9 @@ public class GoodsController {
 	GoodsService goodsService;
 	
 	@GetMapping("/list")
-	public ResponseEntity<String> HandleGoodsList(@RequestParam Map<String, String> params) {
-		String keyword = params.get("keyword");
-		goodsService.UpdateGoodsService(keyword);
-		return ResponseEntity.ok("Success");
+	public ResponseEntity<List<Goods>> HandleGoodsList(@RequestParam Map<String, String> params) {
+		List<Goods> goods = goodsService.GetGoodsService(params);
+		return ResponseEntity.ok(goods);
 	}
 	
 	@GetMapping("history")

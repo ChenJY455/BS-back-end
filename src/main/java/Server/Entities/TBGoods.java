@@ -8,7 +8,7 @@ import lombok.Data;
 @Entity
 public class TBGoods implements Goods {
 	@Id
-	long id;
+	long gid;
 	String img_url;
 	@Column(nullable = false)
 	String name;
@@ -17,14 +17,17 @@ public class TBGoods implements Goods {
 	@Column(columnDefinition = "TEXT")
 	String click_url;
 	String factory;
+	@Column(nullable = false)
+	String keyword;
 	
 	public TBGoods() {}
-	public TBGoods(long id, String imgUrl, String name, double price, String clickUrl, String factory) {
-		this.id = id;
+	public TBGoods(long gid, String imgUrl, String name, double price, String clickUrl, String factory, String keyword) {
+		this.gid = gid;
 		this.img_url = imgUrl;
 		this.name = name;
 		this.price = price;
 		this.click_url = clickUrl;
 		this.factory = factory;
+		this.keyword = keyword;
 	}
 }

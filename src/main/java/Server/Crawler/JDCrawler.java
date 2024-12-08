@@ -66,7 +66,7 @@ public class JDCrawler implements Crawler {
         String body_str = response.body();
         Document doc = Jsoup.parse(body_str);
         Elements goods = doc.select(".gl-i-wrap");
-        ExtractGoods(goods_list, goods);
+        ExtractGoods(goods_list, goods, keyword);
         
         // Part 2
         for(int pg = 1; pg <= 10; pg++) {
@@ -135,14 +135,15 @@ public class JDCrawler implements Crawler {
                     goodData.getString("ad_title"),
                     goodData.getDouble("sku_price"),
                     goodData.optString("click_url"),
-                    ""
+                    "",
+                    keyword
                 ));
             }
         }
         return goods_list;
     }
     
-    private void ExtractGoods(List<JDGoods> goods_list, Elements goods) {
+    private void ExtractGoods(List<JDGoods> goods_list, Elements goods, String keyword) {
         for (Element good: goods) {
             long id = Long.parseLong(good.attr("id").split("_")[1]);
             String imgUrl = "https:" + good.select(".p-img > a > img").attr("data-lazy-img");
@@ -150,7 +151,7 @@ public class JDCrawler implements Crawler {
             String name = good.select(".p-name > a > em").text();
             String clickUrl = "https://item.jd.com/" + id + ".html";
             String factory = good.select(".p-shop > span > a").text();
-            goods_list.add(new JDGoods(id, imgUrl, name, price, clickUrl, factory));
+            goods_list.add(new JDGoods(id, imgUrl, name, price, clickUrl, factory, keyword));
         }
     }
 }

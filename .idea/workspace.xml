@@ -5,12 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a944737f-58af-4300-8b29-f62db67c2eb5" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Server/Entities/History.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Controller/GoodsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Controller/GoodsController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Server/Crawler/JDCrawler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Crawler/JDCrawler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Server/Crawler/TBCrawler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Crawler/TBCrawler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Entities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Entities/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Entities/History.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Entities/History.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Entities/JDGoods.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Entities/JDGoods.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Entities/TBGoods.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Entities/TBGoods.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Repository/JDRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Repository/JDRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Service/GoodsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Service/GoodsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Server/Utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Server/Utils/Utils.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,10 +63,10 @@
     "project.structure.side.proportion": "0.0",
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true",
-    "应用程序.Crawler_Test.executor": "Run"
+    "应用程序.Crawler_Test.executor": "Debug"
   }
 }]]></component>
-  <component name="RunManager" selected="应用程序.Crawler_Test">
+  <component name="RunManager" selected="Spring Boot.Main">
     <configuration name="Crawler_Test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Crawler_Test" />
       <module name="purweb" />
@@ -85,8 +89,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="应用程序.Crawler_Test" />
         <item itemvalue="Spring Boot.Main" />
+        <item itemvalue="应用程序.Crawler_Test" />
       </list>
     </recent_temporary>
   </component>
@@ -111,7 +115,7 @@
       <workItem from="1733565116594" duration="315000" />
       <workItem from="1733565471339" duration="4272000" />
       <workItem from="1733634709300" duration="31000" />
-      <workItem from="1733635080856" duration="3997000" />
+      <workItem from="1733635080856" duration="5867000" />
     </task>
     <servers />
   </component>
@@ -131,13 +135,13 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/Server/Crawler/JDCrawler.java</url>
-          <line>129</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

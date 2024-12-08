@@ -8,7 +8,7 @@ import lombok.Data;
 @Entity
 public class JDGoods implements Goods {
 	@Id
-	long id;
+	long gid;
 	String img_url;
 	@Column(nullable = false)
 	String name;
@@ -17,14 +17,17 @@ public class JDGoods implements Goods {
 	@Column(columnDefinition = "TEXT")
 	String click_url;
 	String factory;
+	@Column(nullable = false)
+	String keyword;
 	
 	public JDGoods() {}
-	public JDGoods(long id, String imgUrl, String name, double price, String clickUrl, String factory) {
-		this.id = id;
+	public JDGoods(long gid, String imgUrl, String name, double price, String clickUrl, String factory, String keyword) {
+		this.gid = gid;
 		this.img_url = imgUrl;
 		this.name = name;
 		this.price = price;
 		this.click_url = clickUrl;
 		this.factory = factory;
+		this.keyword = keyword;
 	}
 }

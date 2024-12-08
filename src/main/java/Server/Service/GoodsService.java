@@ -2,10 +2,12 @@ package Server.Service;
 
 import Server.Crawler.JDCrawler;
 import Server.Crawler.TBCrawler;
+import Server.Entities.Goods;
 import Server.Entities.TBGoods;
 import Server.Entities.JDGoods;
 import Server.Repository.JDRepository;
 import Server.Repository.TBRepository;
+import Server.Utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +24,35 @@ public class GoodsService {
 	TBCrawler tbCrawler = new TBCrawler();
 	JDCrawler jdCrawler = new JDCrawler();
 	
-	public void UpdateGoodsService(String keyword) {
+	private void UpdateGoodsService(String keyword, Utils.WebsiteType website) {
 		try {
 			// TODO: 更新覆盖
-			tbCrawler.GetGoodsList(keyword);   // Update token
-			List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword);
-			List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
-			tbRepository.saveAll(tbGoods);
-			jdRepository.saveAll(jdGoods);
+			if(website == Utils.WebsiteType.JD) {
+				List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
+				jdRepository.saveAll(jdGoods);
+			}
+			else {  // website == Utils.WebsiteType.TB
+				tbCrawler.GetGoodsList(keyword);   // Update token
+				List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword);
+				tbRepository.saveAll(tbGoods);
+			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void GetGoodsService(Map<String, String> params) {
-	
+	public List<Goods> GetGoodsService(Map<String, String> params) {
+		String keyword = params.get("keyword");
+		String websiteStr = params.get("website");
+		Utils.WebsiteType website = Utils.WebsiteType.fromString(websiteStr);
+		// TODO: 不一定要刷新
+		UpdateGoodsService(keyword, website);
+		switch (website) {
+			case JD:
+				return jdRepository.findAllByKeyword(keyword);
+			case TB:
+				return tbRepository.findAllByKeyword(keyword);
+		}
+		return null;
 	}
 }
