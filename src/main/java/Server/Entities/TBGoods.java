@@ -19,6 +19,8 @@ public class TBGoods implements Goods {
 	String factory;
 	@Column(nullable = false)
 	String keyword;
+	long t;
+	String website;
 	
 	public TBGoods() {}
 	public TBGoods(long gid, String imgUrl, String name, double price, String clickUrl, String factory, String keyword) {
@@ -29,5 +31,11 @@ public class TBGoods implements Goods {
 		this.click_url = clickUrl;
 		this.factory = factory;
 		this.keyword = keyword;
+		this.t = System.currentTimeMillis();
+		this.website = "TB";
+	}
+	@Override
+	public boolean OverDue() {
+		return (System.currentTimeMillis() - this.t > 3600000);
 	}
 }

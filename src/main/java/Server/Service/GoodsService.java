@@ -26,15 +26,22 @@ public class GoodsService {
 	
 	private void UpdateGoodsService(String keyword, Utils.WebsiteType website) {
 		try {
-			// TODO: 更新覆盖
 			if(website == Utils.WebsiteType.JD) {
-				List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
-				jdRepository.saveAll(jdGoods);
+				// TODO: 不一定要更新
+				// TODO: 覆盖的问题
+				List <Goods> GoodsList = jdRepository.findAllByKeyword(keyword);
+				if(GoodsList == null || GoodsList.isEmpty() || GoodsList.get(0).OverDue()) {
+					List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
+					jdRepository.saveAll(jdGoods);
+				}
 			}
 			else {  // website == Utils.WebsiteType.TB
-				tbCrawler.GetGoodsList(keyword);   // Update token
-				List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword);
-				tbRepository.saveAll(tbGoods);
+				List <Goods> GoodsList = tbRepository.findAllByKeyword(keyword);
+				if(GoodsList == null || GoodsList.isEmpty() || GoodsList.get(0).OverDue()) {
+					tbCrawler.GetGoodsList(keyword);   // Update token
+					List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword);
+					tbRepository.saveAll(tbGoods);
+				}
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -45,7 +52,6 @@ public class GoodsService {
 		String keyword = params.get("keyword");
 		String websiteStr = params.get("website");
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(websiteStr);
-		// TODO: 不一定要刷新
 		UpdateGoodsService(keyword, website);
 		switch (website) {
 			case JD:
