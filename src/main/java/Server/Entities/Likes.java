@@ -1,5 +1,6 @@
 package Server.Entities;
 
+import Server.Utils.Utils;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,8 @@ public class Likes {
 	@ManyToOne
 	@JoinColumn(name = "uid")
 	User user;
+	Utils.WebsiteType website;
+	String name;
 	@ManyToOne
 	@JoinColumn(name = "tb_gid")
 	JDGoods jd_goods;
@@ -21,8 +24,10 @@ public class Likes {
 	TBGoods tb_goods;
 	
 	public Likes() {}
-	public Likes(User user, JDGoods jd_goods, TBGoods tb_goods) {
+	public Likes(User user, Utils.WebsiteType website, String name, JDGoods jd_goods, TBGoods tb_goods) {
 		this.user = user;
+		this.website = website;
+		this.name = name;
 		this.jd_goods = jd_goods;
 		this.tb_goods = tb_goods;
 	}

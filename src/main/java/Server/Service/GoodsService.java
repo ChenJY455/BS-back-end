@@ -9,7 +9,9 @@ import Server.Repository.JDRepository;
 import Server.Repository.LikesRepsitory;
 import Server.Repository.TBRepository;
 import Server.Utils.Utils;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,7 +64,7 @@ public class GoodsService {
 	private void UpdateGoods(String keyword, Utils.WebsiteType website) {
 		try {
 			if(website == Utils.WebsiteType.JD) {
-				// TODO: 不一定要更新
+				// TODO: 分页
 				List <Goods> GoodsList = jdRepository.findByKeywordContaining(keyword);
 				if(GoodsList == null || GoodsList.isEmpty() || GoodsList.get(0).OverDue()) {
 					List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
@@ -85,10 +87,32 @@ public class GoodsService {
 	private void UpdateHistory() {
 		List<Likes> likes = likesRepsitory.findAll();
 		for(var like: likes) {
-			User user = like.getUser();
-			Goods goods = like.getJd_goods() != null?
-					like.getJd_goods() : like.getTb_goods();
-			// TODO: Single good crawler
+			Utils.WebsiteType website = like.getWebsite();
+			String name = like.getName();
+			switch (website) {
+				case JD -> {
+					try {
+						long gid = like.getJd_goods().getGid();
+						List<JDGoods> jdGoods = jdCrawler.GetGoodsList(name);
+						for(JDGoods jdGood: jdGoods) {
+							if(jdGood.getGid() == gid) {
+								List<History> historyList= historyRepository.findAllByJdGids(new JDGoods(gid));
+								if(historyList == null ||
+										historyList.isEmpty() ||
+										historyList.get(0).getPrice() != jdGood.getPrice()) {
+									historyRepository.save(new History(null, jdGood, jdGood.getPrice()));
+								}
+								return;
+							}
+						}
+						throw new NotFoundException("未找到对应商品历史");
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+				case TB -> {}
+			}
+			
 		}
 	}
 }

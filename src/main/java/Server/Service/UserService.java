@@ -5,6 +5,7 @@ import Server.Entities.Likes;
 import Server.Entities.TBGoods;
 import Server.Entities.User;
 import Server.Exception.UnAuthedException;
+import Server.Repository.JDRepository;
 import Server.Repository.LikesRepsitory;
 import Server.Repository.UserRepository;
 import Server.Utils.Utils;
@@ -20,6 +21,8 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private LikesRepsitory likesRepsitory;
+	@Autowired
+	private JDRepository jdRepository;
 	
 	public void LoginService(Map<String, String> params) {
 		String username = params.get("username");
@@ -48,16 +51,25 @@ public class UserService {
 		long gid = Long.parseLong(body.get("gid").toString());
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
 		switch (website) {
-			case JD -> likesRepsitory.save(new Likes(
+			case JD -> {
+				String name = jdRepository.findById(uid).get().getName();
+				likesRepsitory.save(new Likes(
 					new User(uid),
+					Utils.WebsiteType.JD,
+					name,
 					new JDGoods(gid),
 					null
-			));
-			case TB -> likesRepsitory.save(new Likes(
+				));
+			}
+			case TB -> {
+				likesRepsitory.save(new Likes(
 					new User(uid),
+					Utils.WebsiteType.TB,
+					"",
 					null,
 					new TBGoods(gid)
-			));
+				));
+			}
 		}
 	}
 }

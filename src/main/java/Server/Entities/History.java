@@ -22,4 +22,10 @@ public class History {
 	long t;
 	
 	public History() {}
+	public History(TBGoods tbGids, JDGoods jdGids, double price) {
+		this.tbGids = tbGids;
+		this.jdGids = jdGids;
+		this.price = price;
+		this.t = System.currentTimeMillis();
+	}
 }
