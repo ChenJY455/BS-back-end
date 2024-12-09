@@ -23,6 +23,9 @@ public class JDGoods implements Goods {
 	String website;
 	
 	public JDGoods() {}
+	public JDGoods(long gid) {
+		this.gid = gid;
+	}
 	public JDGoods(long gid, String imgUrl, String name, double price, String clickUrl, String factory, String keyword) {
 		this.gid = gid;
 		this.img_url = imgUrl;

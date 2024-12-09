@@ -20,4 +20,6 @@ public class History {
 	double price;
 	@Column(nullable = false)
 	long t;
+	
+	public History() {}
 }

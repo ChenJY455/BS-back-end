@@ -1,5 +1,6 @@
 package Server.Utils;
 
+import Server.Exception.NotFoundException;
 import lombok.Getter;
 import org.json.JSONObject;
 
@@ -23,7 +24,7 @@ public class Utils {
 					return type;
 				}
 			}
-			throw new IllegalArgumentException("Unknown website: " + website);
+			throw new NotFoundException("Unknown website: " + website);
 		}
 	}
 	private Utils() {

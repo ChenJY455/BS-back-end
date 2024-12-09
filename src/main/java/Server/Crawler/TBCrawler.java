@@ -123,8 +123,6 @@ public class TBCrawler implements Crawler {
             sourceS = pageArgs.optInt("sourceS");
             bcoffset = pageArgs.optInt("bcoffset");
             ntoffset = pageArgs.optInt("ntoffset");
-            
-            sleep(100);
         }
         return goods_list;
     }

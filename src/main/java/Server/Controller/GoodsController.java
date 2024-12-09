@@ -1,7 +1,10 @@
 package Server.Controller;
 
 import Server.Entities.Goods;
+import Server.Entities.History;
+import Server.Repository.HistoryRepository;
 import Server.Service.GoodsService;
+import Server.Utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +25,9 @@ public class GoodsController {
 		return ResponseEntity.ok(goods);
 	}
 	
-	@GetMapping("history")
-	public ResponseEntity<String> HandleGoodsHistory(@RequestParam Map<String, String> params) {
-		return ResponseEntity.ok("Success");
+	@GetMapping("/history")
+	public ResponseEntity<List<History>> HandleGoodsHistory(@RequestParam Map<String, String> params) {
+		List<History> history = goodsService.GetHistoryService(params);
+		return ResponseEntity.ok(history);
 	}
 }

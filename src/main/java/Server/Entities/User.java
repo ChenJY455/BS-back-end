@@ -20,6 +20,9 @@ public class User {
 	String email;
 	
 	public User() {}
+	public User(long uid) {
+		this.uid = uid;
+	}
 	public User(String username, String password, String email) {
 		this.username = username;
 		this.password = password;

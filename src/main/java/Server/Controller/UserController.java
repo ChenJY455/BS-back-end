@@ -25,4 +25,10 @@ public class UserController {
 		userService.RegisterService(body);
 		return ResponseEntity.ok("Success");
 	}
+	
+	@PostMapping("/add-likes")
+	public ResponseEntity<String> HandleAddLikes(@RequestBody Map<String, Object> body) {
+		userService.AddLikesService(body);
+		return ResponseEntity.ok("Success");
+	}
 }

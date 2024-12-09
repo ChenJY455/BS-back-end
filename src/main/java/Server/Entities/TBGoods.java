@@ -23,6 +23,9 @@ public class TBGoods implements Goods {
 	String website;
 	
 	public TBGoods() {}
+	public TBGoods(long gid) {
+		this.gid = gid;
+	}
 	public TBGoods(long gid, String imgUrl, String name, double price, String clickUrl, String factory, String keyword) {
 		this.gid = gid;
 		this.img_url = imgUrl;
