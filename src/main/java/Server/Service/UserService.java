@@ -24,41 +24,44 @@ public class UserService {
 	@Autowired
 	private JDRepository jdRepository;
 	
-	public void LoginService(Map<String, String> params) {
+	public User LoginService(Map<String, String> params) {
 		String username = params.get("username");
 		String password = params.get("password");
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new UnAuthedException("用户不存在"));
 		if(!BCrypt.checkpw(password, user.getPassword()))
 			throw new UnAuthedException("用户名或密码错误");
+		return user;
 	}
 	
-	public void RegisterService(Map<String, Object> body) {
+	public User RegisterService(Map<String, Object> body) {
 		String username = body.get("username").toString();
 		String password = body.get("password").toString();
 		String email = body.get("email").toString();
 		if(username.length() < 6 || password.length() < 6)
 			throw new UnAuthedException("用户名或密码不符合要求");
-		userRepository.save(new User(
+		return userRepository.save(new User(
 				username,
 				BCrypt.hashpw(password, BCrypt.gensalt()),
 				email
 		));
 	}
 	
+	// TODO: GetLikes
+	
 	public void AddLikesService(Map<String, Object> body) {
 		long uid = Long.parseLong(body.get("uid").toString());
 		long gid = Long.parseLong(body.get("gid").toString());
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
+		String name = body.get("name").toString();
 		switch (website) {
 			case JD -> {
-				String name = jdRepository.findById(uid).get().getName();
 				likesRepsitory.save(new Likes(
 					new User(uid),
 					Utils.WebsiteType.JD,
 					name,
-					new JDGoods(gid),
-					null
+					0,
+					gid
 				));
 			}
 			case TB -> {
@@ -66,8 +69,8 @@ public class UserService {
 					new User(uid),
 					Utils.WebsiteType.TB,
 					"",
-					null,
-					new TBGoods(gid)
+					gid,
+					0
 				));
 			}
 		}

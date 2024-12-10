@@ -10,21 +10,19 @@ public class History {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	long hid;
-	@ManyToOne
-	@JoinColumn(name = "tb_gid")
-	TBGoods tbGids;
-	@ManyToOne
-	@JoinColumn(name = "jd_gid")
-	JDGoods jdGids;
+	@Column(name = "tb_gid")
+	long tbGid;
+	@Column(name = "jd_gid")
+	long jdGid;
 	@Column(nullable = false)
 	double price;
 	@Column(nullable = false)
 	long t;
 	
 	public History() {}
-	public History(TBGoods tbGids, JDGoods jdGids, double price) {
-		this.tbGids = tbGids;
-		this.jdGids = jdGids;
+	public History(long tbGid, long jdGid, double price) {
+		this.tbGid = tbGid;
+		this.jdGid = jdGid;
 		this.price = price;
 		this.t = System.currentTimeMillis();
 	}

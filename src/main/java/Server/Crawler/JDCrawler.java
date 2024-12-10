@@ -1,5 +1,6 @@
 package Server.Crawler;
 
+import Server.Entities.History;
 import Server.Entities.JDGoods;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
@@ -23,16 +25,15 @@ import java.util.List;
 
 public class JDCrawler implements Crawler {
     @Override
-    public List<JDGoods> GetGoodsList(String keyword) throws IOException, InterruptedException {
-        Gson gson = new GsonBuilder().create();
+    public List<JDGoods> GetGoodsList(String keyword, int page) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newBuilder().build();
         List<JDGoods> goods_list = new ArrayList<>();
         // Part 1
         String base_url = "https://search.jd.com/Search";
         String url = UriComponentsBuilder.fromHttpUrl(base_url)
-                .queryParam("keyword", keyword)
+                .queryParam("keyword", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
                 .queryParam("enc", "utf-8")
-                .queryParam("wq", keyword)
+                .queryParam("wq", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
                 .queryParam("pvid", "3a7ebc5b4b74472280b7ce2eed54878")
                 .toUriString();
         // Build headers
@@ -68,17 +69,17 @@ public class JDCrawler implements Crawler {
         ExtractGoods(goods_list, goods, keyword);
         
         // Part 2
-        for(int pg = 1; pg <= 10; pg++) {
+        for(int pg = 1; pg <= page; pg++) {
             base_url = "https://re.jd.com/search";
             if(pg == 1)
                 url = UriComponentsBuilder.fromHttpUrl(base_url)
-                        .queryParam("keyword", keyword)
+                        .queryParam("keyword", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
                         .queryParam("enc", "utf-8")
                         .build()
                         .toUriString();
             else
                 url = UriComponentsBuilder.fromHttpUrl(base_url)
-                        .queryParam("keyword", keyword)
+                        .queryParam("keyword", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
                         .queryParam("page", pg)
                         .queryParam("enc", "utf-8")
                         .build()
@@ -129,10 +130,10 @@ public class JDCrawler implements Crawler {
             for(int i = 0; i < dataList.length(); i++) {
                 JSONObject goodData = dataList.getJSONObject(i);
                 goods_list.add(new JDGoods(
-                    goodData.getLong("sku_id"),
+                    goodData.optLong("sku_id"),
                     goodData.optString("image_url"),
-                    goodData.getString("ad_title"),
-                    goodData.getDouble("sku_price"),
+                    goodData.optString("ad_title"),
+                    goodData.optDouble("sku_price"),
                     goodData.optString("click_url"),
                     "",
                     keyword
@@ -140,6 +141,15 @@ public class JDCrawler implements Crawler {
             }
         }
         return goods_list;
+    }
+    
+    public double GetPrice(long gid, String name) throws IOException, InterruptedException {
+        List<JDGoods> jdGoods = GetGoodsList(name, 1);
+        for(JDGoods jdGood: jdGoods) {
+            if(jdGood.getGid() == gid)
+                return jdGood.getPrice();
+        }
+        throw new RuntimeException("商品不存在");
     }
     
     private void ExtractGoods(List<JDGoods> goods_list, Elements goods, String keyword) {

@@ -9,8 +9,9 @@ import Server.Repository.JDRepository;
 import Server.Repository.LikesRepsitory;
 import Server.Repository.TBRepository;
 import Server.Utils.Utils;
-import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -35,24 +36,52 @@ public class GoodsService {
 		String keyword = params.get("keyword");
 		String websiteStr = params.get("website");
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(websiteStr);
-		UpdateGoods(keyword, website);
+		int page = Integer.parseInt(params.get("page"));
+		if(page == 1)
+			UpdateGoods(keyword, website, 1);
+		// 用一个新的线程去更新剩余的商品
+		Thread thread = new Thread(() -> {
+			// 先看需不需要更新
+			Sort sort = Sort.by(Sort.Order.asc("t"));
+			Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, sort);
+			switch (website) {
+				case JD -> {
+					List<Goods> goodsList = jdRepository.findByKeywordContaining(keyword, pageable);
+					if(goodsList == null || goodsList.isEmpty() || goodsList.get(0).OverDue()) {
+						UpdateGoods(keyword, Utils.WebsiteType.JD, 20);
+					}
+				}
+				case TB -> {
+					List<Goods> goodsList = tbRepository.findByKeywordContaining(keyword, pageable);
+					if(goodsList == null || goodsList.isEmpty() || goodsList.get(0).OverDue()) {
+						UpdateGoods(keyword, Utils.WebsiteType.TB, 20);
+					}
+				}
+			};
+			UpdateGoods(keyword, website, 10);
+		});
+		thread.start();
+		Pageable pageable = PageRequest.of(page - 1, 30);
 		return switch (website) {
-			case JD -> jdRepository.findByKeywordContaining(keyword);
-			case TB -> tbRepository.findByKeywordContaining(keyword);
+			case JD -> jdRepository.findByKeywordContaining(keyword, pageable);
+			case TB -> tbRepository.findByKeywordContaining(keyword, pageable);
 		};
 	}
 	
 	public List<History> GetHistoryService(Map<String, String> params) {
+		// TODO: 需要改成定时更新
+		UpdateHistory();
 		String website = params.get("website");
 		long gid = Long.parseLong(params.get("gid"));
 		List<History> historyList;
+		Sort sort = Sort.by(Sort.Order.asc("t"));
 		if(website.equals(Utils.WebsiteType.JD.name())) {
-			historyList = historyRepository.findAllByJdGids(new JDGoods(gid));
+			historyList = historyRepository.findAllByJdGid(gid, sort);
 			if(historyList == null || historyList.isEmpty())
 				throw new NotFoundException("历史信息未找到");
 		}
 		else if(website.equals(Utils.WebsiteType.TB.name())) {
-			historyList = historyRepository.findAllByTbGids(new TBGoods(gid));
+			historyList = historyRepository.findAllByTbGid(gid, sort);
 			if(historyList == null || historyList.isEmpty())
 				throw new NotFoundException("历史信息未找到");
 		}
@@ -61,23 +90,15 @@ public class GoodsService {
 		return historyList;
 	}
 	
-	private void UpdateGoods(String keyword, Utils.WebsiteType website) {
+	private void UpdateGoods(String keyword, Utils.WebsiteType website, int page) {
 		try {
 			if(website == Utils.WebsiteType.JD) {
-				// TODO: 分页
-				List <Goods> GoodsList = jdRepository.findByKeywordContaining(keyword);
-				if(GoodsList == null || GoodsList.isEmpty() || GoodsList.get(0).OverDue()) {
-					List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword);
-					jdRepository.saveAll(jdGoods);
-				}
+				List<JDGoods> jdGoods = jdCrawler.GetGoodsList(keyword, page);
+				jdRepository.saveAll(jdGoods);
 			}
 			else {  // website == Utils.WebsiteType.TB
-				List <Goods> GoodsList = tbRepository.findByKeywordContaining(keyword);
-				if(GoodsList == null || GoodsList.isEmpty() || GoodsList.get(0).OverDue()) {
-					tbCrawler.GetGoodsList(keyword);   // Update token
-					List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword);
-					tbRepository.saveAll(tbGoods);
-				}
+				List<TBGoods> tbGoods = tbCrawler.GetGoodsList(keyword, page);
+				tbRepository.saveAll(tbGoods);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -92,25 +113,38 @@ public class GoodsService {
 			switch (website) {
 				case JD -> {
 					try {
-						long gid = like.getJd_goods().getGid();
-						List<JDGoods> jdGoods = jdCrawler.GetGoodsList(name);
-						for(JDGoods jdGood: jdGoods) {
-							if(jdGood.getGid() == gid) {
-								List<History> historyList= historyRepository.findAllByJdGids(new JDGoods(gid));
-								if(historyList == null ||
-										historyList.isEmpty() ||
-										historyList.get(0).getPrice() != jdGood.getPrice()) {
-									historyRepository.save(new History(null, jdGood, jdGood.getPrice()));
-								}
-								return;
-							}
+						long gid = like.getJdGid();
+						double price = jdCrawler.GetPrice(gid, name);
+						List<History> historyList= historyRepository.findAllByJdGid(
+								gid,
+								Sort.by(Sort.Order.desc("t")));
+						if(historyList == null ||
+								historyList.isEmpty() ||
+								historyList.get(0).getPrice() != price)
+						{
+							historyRepository.save(new History(0, gid, price));
 						}
-						throw new NotFoundException("未找到对应商品历史");
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
 				}
-				case TB -> {}
+				case TB -> {
+					try {
+						long gid = like.getTbGid();
+						double price = tbCrawler.GetPrice(gid);
+						List<History> historyList= historyRepository.findAllByTbGid(
+								gid,
+								Sort.by(Sort.Order.desc("t")));
+						if(historyList == null ||
+								historyList.isEmpty() ||
+								historyList.get(0).getPrice() != price)
+						{
+							historyRepository.save(new History(gid, 0, price));
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
 			}
 			
 		}

@@ -1,7 +1,5 @@
-import Server.Crawler.Crawler;
 import Server.Crawler.TBCrawler;
 import Server.Crawler.JDCrawler;
-import Server.Entities.Goods;
 import Server.Entities.JDGoods;
 import Server.Entities.TBGoods;
 
@@ -18,7 +16,7 @@ public class Crawler_Test {
 	private static void JDTest() {
 		try {
 			JDCrawler jdCrawler = new JDCrawler();
-			List<JDGoods> goodsArray = jdCrawler.GetGoodsList("冰箱");
+			List<JDGoods> goodsArray = jdCrawler.GetGoodsList("冰箱", 10);
 			for(JDGoods goods : goodsArray) {
 				System.out.println(goods.getGid() + " " +
 						goods.getName() + " " +
@@ -35,19 +33,16 @@ public class Crawler_Test {
 	private static void TBTest() {
 		try {
 			TBCrawler tbCrawler = new TBCrawler();
-			for(int i = 0; i < 2; i++) {
-				List<TBGoods> goodsArray = tbCrawler.GetGoodsList("冰箱");
-				if(goodsArray == null)
-					continue;
-				for(TBGoods goods : goodsArray) {
-					System.out.println(goods.getGid() + " " +
-							goods.getName() + " " +
-							goods.getPrice() + " " +
-							goods.getFactory() + " " +
-							goods.getClick_url());
-				}
-				break;
+			List<TBGoods> goodsArray = tbCrawler.GetGoodsList("粮油米面", 10);
+			for(TBGoods goods : goodsArray) {
+				System.out.println(goods.getGid() + " " +
+						goods.getName() + " " +
+						goods.getPrice() + " " +
+						goods.getFactory() + " " +
+						goods.getClick_url());
 			}
+			double price = tbCrawler.GetPrice(839801567320L);
+			System.out.println(price);
 		}
 		catch (Exception e) {
 			e.printStackTrace();

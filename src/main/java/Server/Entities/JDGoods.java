@@ -9,6 +9,7 @@ import lombok.Data;
 public class JDGoods implements Goods {
 	@Id
 	long gid;
+	@Column(columnDefinition = "TEXT")
 	String img_url;
 	@Column(nullable = false)
 	String name;

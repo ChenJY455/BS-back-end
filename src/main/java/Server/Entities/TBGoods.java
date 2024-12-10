@@ -9,6 +9,7 @@ import lombok.Data;
 public class TBGoods implements Goods {
 	@Id
 	long gid;
+	@Column(columnDefinition = "TEXT")
 	String img_url;
 	@Column(nullable = false)
 	String name;

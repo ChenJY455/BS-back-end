@@ -17,8 +17,9 @@ import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import static Server.Utils.Utils.DepressBytes;
 import static Server.Utils.Utils.getJsonObject16;
-import static java.lang.Thread.sleep;
 
 public class TBCrawler implements Crawler {
     private static String em_token = "";
@@ -29,11 +30,11 @@ public class TBCrawler implements Crawler {
     private static int ntoffset = 0;
     
     @Override
-    public List<TBGoods> GetGoodsList(String keyword) throws NoSuchAlgorithmException, IOException, InterruptedException {
+    public List<TBGoods> GetGoodsList(String keyword, int page) throws NoSuchAlgorithmException, IOException, InterruptedException {
         // Get client
         HttpClient client = HttpClient.newBuilder().build();
         List<TBGoods> goods_list = new ArrayList<>();
-        for(int pg = 1; pg <= 10; pg++) {
+        for(int pg = 1; pg <= page; pg++) {
             // Build Url with args
             String ep_data = BuildDataBody(keyword, pg);
             long t = System.currentTimeMillis();
@@ -83,48 +84,166 @@ public class TBCrawler implements Crawler {
             HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
             byte[] body_byte = response.body();
             JSONObject jsonObject = getJsonObject16(body_byte);
-            String ret = jsonObject.get("ret").toString();
-            if(!ret.equals("[\"SUCCESS::调用成功\"]")) {
-                // Update cookie
-                HttpHeaders headers = response.headers();
-                List<String> set_cookies = headers.allValues("Set-Cookie");
-                for (String cookie : set_cookies) {
-                    if (cookie.contains("_m_h5_tk") && !cookie.contains("_m_h5_tk_enc")) {
-                        em_token = cookie.split("=")[1].split(";")[0];
-                    }
-                    if (cookie.contains("_m_h5_tk_enc")) {
-                        em_token_enc = cookie.split("=")[1].split(";")[0];
-                    }
+            String ret = jsonObject.getJSONArray("ret").get(0).toString();
+            if(ret.equals("SUCCESS::调用成功")) {
+                // Success
+                JSONObject data = jsonObject.getJSONObject("data");
+                JSONArray data_arr = data.getJSONArray("itemsArray");
+                for(int i = 0; i < data_arr.length(); i++) {
+                    JSONObject good_obj = data_arr.getJSONObject(i);
+                    JSONObject price_show = good_obj.getJSONObject("priceShow");
+                    JSONObject shop_info = good_obj.optJSONObject("shopInfo");
+                    goods_list.add(new TBGoods(
+                            good_obj.getLong("item_id"),
+                            good_obj.optString("pic_path"),
+                            good_obj.optString("title"),
+                            price_show.optDouble("price"),
+                            good_obj.optString("clickUrl"),
+                            shop_info.optString("title"),
+                            keyword
+                    ));
                 }
+                
+                // Updata page args
+                JSONObject pageArgs = data.getJSONObject("mainInfo");
+                totalResults = pageArgs.optInt("totalResults");
+                sourceS = pageArgs.optInt("sourceS");
+                bcoffset = pageArgs.optInt("bcoffset");
+                ntoffset = pageArgs.optInt("ntoffset");
+            }
+            else if(ret.equals("FAIL_SYS_TOKEN_EMPTY::令牌为空") || ret.equals("FAIL_SYS_TOKEN_EXOIRED::令牌过期")) {
+                // Update cookie
+                UpdateToken(response);
                 System.out.println(ret);
-                return null;
+                return GetGoodsList(keyword, page);   // Redo
             }
-            // Success
-            JSONObject data = jsonObject.getJSONObject("data");
-            JSONArray data_arr = data.getJSONArray("itemsArray");
-            for(int i = 0; i < data_arr.length(); i++) {
-                JSONObject good_obj = data_arr.getJSONObject(i);
-                JSONObject price_show = good_obj.getJSONObject("priceShow");
-                JSONObject shop_info = good_obj.optJSONObject("shopInfo");
-                goods_list.add(new TBGoods(
-                        good_obj.getLong("item_id"),
-                        good_obj.optString("pic_path"),
-                        good_obj.optString("title"),
-                        price_show.optDouble("price"),
-                        good_obj.optString("clickUrl"),
-                        shop_info.optString("title"),
-                        keyword
-                ));
+            else {
+                throw new RuntimeException("商品获取失败");
             }
-            
-            // Updata page args
-            JSONObject pageArgs = data.getJSONObject("mainInfo");
-            totalResults = pageArgs.optInt("totalResults");
-            sourceS = pageArgs.optInt("sourceS");
-            bcoffset = pageArgs.optInt("bcoffset");
-            ntoffset = pageArgs.optInt("ntoffset");
         }
         return goods_list;
+    }
+    
+    public double GetPrice(long gid) throws NoSuchAlgorithmException, IOException, InterruptedException {
+        // Get client
+        HttpClient client = HttpClient.newBuilder().build();
+        // Build Url with args
+        String ep_data =
+                "{" +
+                    "\"id\":\"" + gid + "\"," +
+                    "\"detail_v\":\"3.3.2\"," +
+                    "\"exParams\":" +
+                        "\"{" +
+                        "\\\"id\\\":\\\"" + gid +  "\\\"," +
+                        "\\\"queryParams\\\":\\\"id=" + gid + "\\\"," +
+                        "\\\"domain\\\":\\\"https://item.taobao.com\\\"," +
+                        "\\\"path_name\\\":\\\"/item.htm\\\"" +
+                    "}\"" +
+                "}";
+        long t = System.currentTimeMillis();
+        String sign = BuildSign(ep_data, t);
+        String base_url = "https://h5api.m.taobao.com/h5/mtop.taobao.pcdetail.data.get/1.0/";
+        String url = UriComponentsBuilder.fromHttpUrl(base_url)
+                .queryParam("jsv", "2.7.4")
+                .queryParam("appKey", "12574478")
+                .queryParam("t", t)
+                .queryParam("sign", sign)
+                .queryParam("api", "mtop.taobao.pcdetail.data.get")
+                .queryParam("v", "1.0")
+                .queryParam("isSec", "0")
+                .queryParam("ecode", "0")
+                .queryParam("timeout", "10000")
+                .queryParam("ttid", "2022@taobao_litepc_9.17.0")
+                .queryParam("AntiFlood", "true")
+                .queryParam("AntiCreep", "true")
+                .queryParam("dataType", "json")
+                .queryParam("valueType", "string")
+                .queryParam("type", "json")
+                .queryParam("data", ep_data)
+                .toUriString();
+        
+        String cookies = "t=5d55b812d9e70f69aebc940145d1ae8a; " +
+                "thw=xx; " +
+                "_tb_token_=53edae3765343; " +
+                "xlly_s=1; " +
+                "cookie2=17bae2c39ded3fc3331e56c219a4da3e; " +
+                "_samesite_flag_=true; " +
+                "mtop_partitioned_detect=1; " +
+                "_m_h5_tk=" + em_token + "; " +
+                "_m_h5_tk_enc=" + em_token_enc + "; " +
+                "3PcFlag=1733818939878; " +
+                
+                "sgcookie=E100t62HDvPQKx9Ql%2F0O7UIzG2qdja8sSijSKiLwRKIEFN8a4P5LjpdGRY7GajRloiH5cSabOe8XmB1IISsDp" +
+                "oau5gZyavEHi7PILZoWoHttF9gzQeNP30Ydii0A8dfxti%2BI; " +
+                
+                "wk_cookie2=10eae1aad3469258e12f3078d7e4b9af; " +
+                "wk_unb=UNcBcqBiLDE3tA%3D%3D; " +
+                "mt=ci=0_0; " +
+                "tracknick=; " +
+                "cna=EMLWHyN7yW4BASQIhkLkbi2p; " +
+                "isg=BMXFPQ7JDhPP_yrX48qhtVGx1AH_gnkU3GurOscriPwLXubQjtNV5Up9aIKoGZHM; " +
+                
+                "tfstk=fLprZBmQjYHr_hMQdgWU3ZXg3dBRHT0s8p_CxHxhVabkNwweLZ-i2aGKweR2-EC5rQ_QLp72rJ1WLHeFxHYK2wi-G3K" +
+                "Rp90s5wk623nwDzFBUw40inIQ-gYfj7DGp90slSwhwAWpWzH_aLxm0MsQEgYhtoVckMylqeblirjNX9XhKe20oGSz-ybhromV" +
+                "vZbhK9DIMgSYdM1oX5h26bNyo_7M0feUKRj85NKluJ2hlg5zg3b4KJv2GLWYOacTcwB5ypSyJAeRE6R9AM8rU8YeXKLVmFDUC" +
+                "axvfC1JEXw1_T_POLYE8WSy1U8dr34uZGWPz1vlMlyp06A23T9oJ5KX0afNhIGxP66yzCQOZj3v8n7W-L50zq_B1n9lgF0b3e" +
+                "Ce6HsezYykSgRTJi0J6pdz-W5lDi7s0mrncrTVtOUYZWFdwdsV50jT9WClDi7s0mPL9_Lf0NilX";
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Accept", "application/json")
+                .header("Accept-encoding", "gzip, deflate, br, zstd")
+                .header("Accept-language", "zh-CN,zh;q=0.9,en;q=0.8")
+                .header("Content-type", "application/x-www-form-urlencoded")
+                .header("Cookie", cookies)
+                .header("Dnt", "1")
+                .header("Origin", "https://item.taobao.com")
+                .header("Priority", "priority")
+                .header("Referer", "https://item.taobao.com/")
+                .header("Sec-Ch-Ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                .header("Sec-Ch-Ua-Mobile", "?0")
+                .header("Sec-Ch-Ua-Platform", "Windows")
+                .header("Sec-Fetch-Dest", "empty")
+                .header("Sec-Fetch-Mode", "cors")
+                .header("sec-fetch-site", "same-site")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" +
+                        " (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                .GET()
+                .build();
+        
+        HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        byte[] body_byte = response.body();
+        String body_str = DepressBytes(body_byte);
+        JSONObject jsonObject = new JSONObject(body_str);
+        String ret = jsonObject.getJSONArray("ret").get(0).toString();
+        if(ret.equals("SUCCESS::调用成功")) {
+            return jsonObject.getJSONObject("data")
+                    .getJSONObject("componentsVO")
+                    .getJSONObject("priceVO")
+                    .getJSONObject("price")
+                    .getDouble("priceText");
+        }
+        else if(ret.equals("FAIL_SYS_TOKEN_EMPTY::令牌为空") || ret.equals("FAIL_SYS_TOKEN_EXOIRED::令牌过期")) {
+            // Update cookie
+            UpdateToken(response);
+            return GetPrice(gid);   // Redo
+        }
+        else {
+            throw new RuntimeException("获取商品失败");
+        }
+    }
+    
+    private void UpdateToken(HttpResponse<byte[]> response) {
+        HttpHeaders headers = response.headers();
+        List<String> set_cookies = headers.allValues("Set-Cookie");
+        for (String cookie : set_cookies) {
+            if (cookie.contains("_m_h5_tk") && !cookie.contains("_m_h5_tk_enc")) {
+                em_token = cookie.split("=")[1].split(";")[0];
+            }
+            if (cookie.contains("_m_h5_tk_enc")) {
+                em_token_enc = cookie.split("=")[1].split(";")[0];
+            }
+        }
     }
     
     private static String BuildDataBody(String keyword, int page) {
