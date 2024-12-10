@@ -13,6 +13,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,7 +48,10 @@ public class UserService {
 		));
 	}
 	
-	// TODO: GetLikes
+	public List<Likes> GetLikesService(Map<String, String> params) {
+		long uid = Long.parseLong(params.get("uid"));
+		return likesRepsitory.findAllByUser(new User(uid));
+	}
 	
 	public void AddLikesService(Map<String, Object> body) {
 		long uid = Long.parseLong(body.get("uid").toString());

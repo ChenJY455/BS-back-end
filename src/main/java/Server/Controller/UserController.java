@@ -1,11 +1,13 @@
 package Server.Controller;
 
+import Server.Entities.Likes;
 import Server.Entities.User;
 import Server.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,6 +21,11 @@ public class UserController {
 	public ResponseEntity<User> HandleLogin(@RequestParam Map<String, String> params) {
 		User user = userService.LoginService(params);
 		return ResponseEntity.ok(user);
+	}
+	
+	@GetMapping("/get-likes")
+	public ResponseEntity<List<Likes>> HandleGetLikes(@RequestParam Map<String, String> params) {
+		return ResponseEntity.ok(userService.GetLikesService(params));
 	}
 	
 	@PostMapping("/register")

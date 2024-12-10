@@ -57,7 +57,7 @@ public class GoodsService {
 						UpdateGoods(keyword, Utils.WebsiteType.TB, 20);
 					}
 				}
-			};
+			}
 			UpdateGoods(keyword, website, 10);
 		});
 		thread.start();
