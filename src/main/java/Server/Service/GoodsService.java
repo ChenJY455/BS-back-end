@@ -26,11 +26,12 @@ public class GoodsService {
 	private TBRepository tbRepository;
 	@Autowired
 	private HistoryRepository historyRepository;
+	@Autowired
+	private LikesRepsitory likesRepsitory;
 	
 	TBCrawler tbCrawler = new TBCrawler();
 	JDCrawler jdCrawler = new JDCrawler();
-	@Autowired
-	private LikesRepsitory likesRepsitory;
+
 	
 	public List<Goods> GetGoodsService(Map<String, String> params) {
 		String keyword = params.get("keyword");

@@ -22,8 +22,6 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private LikesRepsitory likesRepsitory;
-	@Autowired
-	private JDRepository jdRepository;
 	
 	public User LoginService(Map<String, String> params) {
 		String username = params.get("username");

@@ -11,7 +11,7 @@ public class TBGoods implements Goods {
 	long gid;
 	@Column(columnDefinition = "TEXT")
 	String img_url;
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "TEXT")
 	String name;
 	@Column(nullable = false)
 	double price;

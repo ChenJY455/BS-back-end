@@ -1,16 +1,12 @@
 package Server.Crawler;
 
-import Server.Entities.History;
 import Server.Entities.JDGoods;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
@@ -31,35 +27,14 @@ public class JDCrawler implements Crawler {
         // Part 1
         String base_url = "https://search.jd.com/Search";
         String url = UriComponentsBuilder.fromHttpUrl(base_url)
-                .queryParam("keyword", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
+                .queryParam("keyword", keyword)
                 .queryParam("enc", "utf-8")
-                .queryParam("wq", URLEncoder.encode(keyword, StandardCharsets.UTF_8))
-                .queryParam("pvid", "3a7ebc5b4b74472280b7ce2eed54878")
                 .toUriString();
         // Build headers
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .header("Referer", "https://search.jd.com/")
-                .header("Origin", "https://search.jd.com")
-                .header("Cookie", "__jdv=76161171|direct|-|none|-|1733318282467; __jdu=17333182824671" +
-                        "251911185; 3AB9D23F7A4B3CSS=jdd03AKYIJ453U7RKTIL3OK34TXUWMZBDJGCJJWQPI73X76S3CYXGHJ7GBHZ" +
-                        "D3KL6UDJZJ77UZ6V23XH2L3RJZNTQXJNA5MAAAAMTSHJA3YAAAAAADWCMQN2NP5O2ZMX; _gia_d=1; areaId=1" +
-                        "5; ipLoc-djd=15-1213-0-0; PCSYCityID=CN_330000_330100_0; shshshfpa=298afdff-995b-a010-64" +
-                        "43-53e9c766801a-1733318285; shshshfpx=298afdff-995b-a010-6443-53e9c766801a-1733318285; _" +
-                        "pst=jd_oRuYNDNqxgSD; unick=jd_2on3057z2q2vxf; pin=jd_oRuYNDNqxgSD; thor=2F95E3975A89DA34" +
-                        "57D6C978388FA5FA6CCBCBA48BDB31A9EC2C1C908B2DCEE2870D5E72B8E8D74D0DC978DB812C0C3AD4DA9293" +
-                        "C2889F4CFBF5322C942A49781F28F1C76B943B542E1D53503CA636C21493CE0A3A699FCF8334D0E649B472E7" +
-                        "E639B8C2195AA0165BE6FE92E414563F33E88BC5ED625E4B4BC25752B347F04E452B03C5EC0CB6560C8AA002" +
-                        "9DED2B8B3626B8AB8B9A1084E23D153D82116A75; _tp=GsVOiNf2KYg8qBvUAr0ERw%3D%3D; pinId=kiavRP" +
-                        "ELr0xX-AvOVLFMCg; umc_count=1; jsavif=1; flash=3_vDgZ2rGDIjknKT2X7yhgEFqzDGmW7gPRq8lTCIg" +
-                        "U5mkuioDXt60Iv5Ju82PG2niFIXVnIa4PwVMR-4GdFwZEG-fIT3lIgDO_L0ii3g9nWXLSGnIyR6cPLtg4j8fX3Mv" +
-                        "CHJYDLyDuSHn-qplhfYzTbhK3u_e5H8HOram1sjb6Bk**; __jda=143920055.17333182824671251911185.1" +
-                        "733318282.1733318282.1733318282.1; __jdb=143920055.5.17333182824671251911185|1.173331828" +
-                        "2; __jdc=143920055; shshshfpb=BApXS-TXakvZAfFPvaxxOpNaKOp58oDHABnFwhapo9xJ1MjFtTYG2; 3AB" +
-                        "9D23F7A4B3C9B=AKYIJ453U7RKTIL3OK34TXUWMZBDJGCJJWQPI73X76S3CYXGHJ7GBHZD3KL6UDJZJ77UZ6V23X" +
-                        "H2L3RJZNTQXJNA5M")
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (" +
-                        "KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0")
+                .header("Cookie", "__jdu=17333182824671251911185; areaId=15; PCSYCityID=CN_330000_330100_0; shshshfpa=298afdff-995b-a010-6443-53e9c766801a-1733318285; shshshfpx=298afdff-995b-a010-6443-53e9c766801a-1733318285; ipLoc-djd=15-1213-3038-59931; qrsc=3; user-key=7afa1723-e89a-45bf-8888-5c0c0f697e30; rkv=1.0; jsavif=1; umc_count=1; pinId=3B9Hy-IeniS1qy8dd7-DCkvWB9rZ95Do; pin=jd_8tIZxgXboHQAaBM; unick=jd_7c7577hspe9d4p; _tp=21OT6JrxL1aE%2FaPlv%2FZqd9X0cYPnX9jBdHPZ1uoTAiM%3D; _pst=jd_8tIZxgXboHQAaBM; unpl=JF8EALRnNSttDx9dVRILHBEQTg1UWwgKSB8KP2ACUV1RHgQEEgtJFhB7XlVdWBRLFB9vZxRUXVNOXA4YASsSEXteU11bD00VB2xXVgQFDQ8WUUtBSUt-S1tXV1QOSh4AbGYDZG1bS2QFGjIbFBJJX1RXXgFIEgRpZwZQXVBLVAUSBisTIExtZG5fDUMeC21XBGRcaAkAWR8KHBcSQxBUWF8KSRcKbG4GUVpeS1cBGwobEhBCWWRfbQs; __jdv=229668127|baidu-search|t_262767352_baidusearch|cpc|172887082207_0_fe8a886214a14d3298a66418da088c51|1733888963149; mt_xid=V2_52007VwMUUF9aUlMcQBpZAmEDEVZdUFJaH0AdbFU3BkFVXF9VRhZLHgsZYldABUELUw5IVR0IUG4GEQIPD1FaHXkaXQZiHxJRQVhSSx9KEl0MbAMTYl9oUWocSB9UAGIzEVVdXg%3D%3D; avif=1; jsavif=1; TrackID=1VX78I4aE0D67WiiLZmcHd7_2JZ-ZbBY4Av0ceFDKKm_FII28V__mtAGU_gY9gdiggxudDaJTXHiCaja5C8e4zBko6kDgPaGQFOxrxaU_2Ib1rG7MKJ5WLMCm9wCFFv7i; thor=487B2C4A2268FD7AD8291C1E3E9E63993D72C9FAA87823F03DD827C422D98C018414F77F0490820A381DF7CE6832562EA12BE222130885719EC4F23A2B57315777AE2A0E813CD4337C60ED4BE9257EB2DC767DEFA4A146AFE73DA5546746818B179074D715691D2BD2F418DBE7AC9A34DDB8A36D1170836C23C27E1EBCD2F4A69407D1D620903CA39DEFDE43F5F08F55D786BA54E52D9013A078B28749B92C8E; light_key=AASBKE7rOxgWQziEhC_QY6yadRPZlQi6kNlHvqlvaulmS4MM5ogEwjj91p0fguufZp9o4rUH; ceshi3.com=000; xapieid=jdd03AKYIJ453U7RKTIL3OK34TXUWMZBDJGCJJWQPI73X76S3CYXGHJ7GBHZD3KL6UDJZJ77UZ6V23XH2L3RJZNTQXJNA5MAAAAMTWQP2FDYAAAAAC7ZA4XMPLL26DAX; 3AB9D23F7A4B3CSS=jdd03AKYIJ453U7RKTIL3OK34TXUWMZBDJGCJJWQPI73X76S3CYXGHJ7GBHZD3KL6UDJZJ77UZ6V23XH2L3RJZNTQXJNA5MAAAAMTWQQZ72AAAAAACXICOBMDEYKFCQX; _gia_d=1; flash=3_UjJIbgJ_koiqnNJuQ0tukyMmvVj6vjgj7Rec55iSnzUqsnsiPJwGD86GuH_lHjFdI88-sPC9RmG_USOnQtQLeVJoPNO7v-4-Htoref5zuLAadDvtnqrqfgyFaCnrxsmSHUPBLieoXwf9iuBClOiZ63LEGGwF2pjgZWUf6wjdLI6NsVM8ixog5f-T; 3AB9D23F7A4B3C9B=AKYIJ453U7RKTIL3OK34TXUWMZBDJGCJJWQPI73X76S3CYXGHJ7GBHZD3KL6UDJZJ77UZ6V23XH2L3RJZNTQXJNA5M; joyya=1733893926.1733893929.27.1eldhbn; __jda=76161171.17333182824671251911185.1733318282.1733887562.1733893792.15; __jdb=76161171.9.17333182824671251911185|15.1733893792; __jdc=76161171; shshshfpb=BApXSu1Qpt_ZAfFPvaxxOpNaKOp58oDHABnFwhapq9xJ1MjFtTYG2")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
                 .GET()
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -129,13 +104,16 @@ public class JDCrawler implements Crawler {
             JSONArray dataList = data.getJSONArray("result");
             for(int i = 0; i < dataList.length(); i++) {
                 JSONObject goodData = dataList.getJSONObject(i);
+                String name = goodData.optString("ad_title");
+                if(name.length() > 255)
+                    name = name.substring(0, 255);
                 goods_list.add(new JDGoods(
                     goodData.optLong("sku_id"),
-                    goodData.optString("image_url"),
-                    goodData.optString("ad_title"),
+                    "https://img1.360buyimg.com/n6/" + goodData.optString("image_url"),
+                    name,
                     goodData.optDouble("sku_price"),
                     goodData.optString("click_url"),
-                    "",
+                    "京东商城",
                     keyword
                 ));
             }
