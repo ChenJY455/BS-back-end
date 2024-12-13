@@ -11,7 +11,7 @@ public class Likes {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	long lid;
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.MERGE)
 	@JoinColumn(name = "uid")
 	User user;
 	Utils.WebsiteType website;

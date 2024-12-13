@@ -1,9 +1,6 @@
 package Server.Service;
 
-import Server.Entities.JDGoods;
-import Server.Entities.Likes;
-import Server.Entities.TBGoods;
-import Server.Entities.User;
+import Server.Entities.*;
 import Server.Exception.UnAuthedException;
 import Server.Repository.JDRepository;
 import Server.Repository.LikesRepsitory;
@@ -13,6 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +20,8 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private LikesRepsitory likesRepsitory;
+	@Autowired
+	private GoodsService goodsService;
 	
 	public User LoginService(Map<String, String> params) {
 		String username = params.get("username");
@@ -57,24 +57,50 @@ public class UserService {
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
 		String name = body.get("name").toString();
 		switch (website) {
-			case JD -> {
-				likesRepsitory.save(new Likes(
+			case JD -> likesRepsitory.save(new Likes(
+				new User(uid),
+				Utils.WebsiteType.JD,
+				name,
+				0,
+				gid
+			));
+			case TB -> likesRepsitory.save(new Likes(
+				new User(uid),
+				Utils.WebsiteType.TB,
+				"",
+				gid,
+				0
+			));
+		}
+	}
+	
+	public void RemoveLikesService(Map<String, Object> body) {
+		long uid = Long.parseLong(body.get("uid").toString());
+		long gid = Long.parseLong(body.get("gid").toString());
+		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
+		switch (website) {
+			case JD -> likesRepsitory.delete(new Likes(
 					new User(uid),
 					Utils.WebsiteType.JD,
-					name,
+					"",
 					0,
 					gid
-				));
-			}
-			case TB -> {
-				likesRepsitory.save(new Likes(
+			));
+			case TB -> likesRepsitory.delete(new Likes(
 					new User(uid),
 					Utils.WebsiteType.TB,
 					"",
 					gid,
 					0
-				));
-			}
+			));
 		}
+	}
+	
+	public User ModifyUserService(Map<String, Object> body) {
+		long uid = Long.parseLong(body.get("uid").toString());
+		String username = body.get("username").toString();
+		String password = body.get("password").toString();
+		String email = body.get("email").toString();
+		return userRepository.save(new User(uid, username, BCrypt.hashpw(password, BCrypt.gensalt()), email));
 	}
 }

@@ -39,4 +39,15 @@ public class UserController {
 		userService.AddLikesService(body);
 		return ResponseEntity.ok("Success");
 	}
+	
+	@PostMapping("/remove-likes")
+	public ResponseEntity<String> HandleRemoveLikes(@RequestBody Map<String, Object> body) {
+		userService.RemoveLikesService(body);
+		return ResponseEntity.ok("Success");
+	}
+	
+	@PostMapping("/modify")
+	public ResponseEntity<User> HandleModify(@RequestBody Map<String, Object> body) {
+		return ResponseEntity.ok(userService.ModifyUserService(body));
+	}
 }
