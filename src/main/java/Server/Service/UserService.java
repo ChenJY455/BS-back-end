@@ -61,15 +61,15 @@ public class UserService {
 				new User(uid),
 				Utils.WebsiteType.JD,
 				name,
-				0,
-				gid
+				null,
+				new JDGoods(gid)
 			));
 			case TB -> likesRepsitory.save(new Likes(
 				new User(uid),
 				Utils.WebsiteType.TB,
 				"",
-				gid,
-				0
+				new TBGoods(gid),
+				null
 			));
 		}
 	}
@@ -83,15 +83,15 @@ public class UserService {
 					new User(uid),
 					Utils.WebsiteType.JD,
 					"",
-					0,
-					gid
+					null,
+					new JDGoods(gid)
 			));
 			case TB -> likesRepsitory.delete(new Likes(
 					new User(uid),
 					Utils.WebsiteType.TB,
 					"",
-					gid,
-					0
+					new TBGoods(gid),
+					null
 			));
 		}
 	}

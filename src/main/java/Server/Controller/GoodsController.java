@@ -19,13 +19,14 @@ public class GoodsController {
 	@Autowired
 	GoodsService goodsService;
 	
-	@GetMapping("/list")
+	@GetMapping("/get-list")
 	public ResponseEntity<List<Goods>> HandleGoodsList(@RequestParam Map<String, String> params) {
 		List<Goods> goods = goodsService.GetGoodsService(params);
 		return ResponseEntity.ok(goods);
 	}
 	
-	@GetMapping("/history")
+	@GetMapping("/get-history")
+	// TODO: 新加进来的东西也要更新
 	public ResponseEntity<List<History>> HandleGoodsHistory(@RequestParam Map<String, String> params) {
 		List<History> history = goodsService.GetHistoryService(params);
 		return ResponseEntity.ok(history);

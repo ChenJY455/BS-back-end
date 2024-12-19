@@ -16,17 +16,19 @@ public class Likes {
 	User user;
 	Utils.WebsiteType website;
 	String name;
-	@Column(name = "tb_gid")
-	long tbGid;
-	@Column(name = "jd_gid")
-	long jdGid;
+	@ManyToOne
+	@JoinColumn(name = "jd_goods")
+	JDGoods jdGoods;
+	@ManyToOne
+	@JoinColumn(name = "tb_goods")
+	TBGoods tbGoods;
 	
 	public Likes() {}
-	public Likes(User user, Utils.WebsiteType website, String name, long tbGid, long jdGid) {
+	public Likes(User user, Utils.WebsiteType website, String name, TBGoods tbGoods, JDGoods jdGoods) {
 		this.user = user;
 		this.website = website;
 		this.name = name;
-		this.tbGid = tbGid;
-		this.jdGid = jdGid;
+		this.tbGoods = tbGoods;
+		this.jdGoods = jdGoods;
 	}
 }

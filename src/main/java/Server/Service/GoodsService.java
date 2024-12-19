@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -70,8 +71,6 @@ public class GoodsService {
 	}
 	
 	public List<History> GetHistoryService(Map<String, String> params) {
-		// TODO: 需要改成定时更新
-		UpdateHistory();
 		String website = params.get("website");
 		long gid = Long.parseLong(params.get("gid"));
 		List<History> historyList;
@@ -106,6 +105,7 @@ public class GoodsService {
 		}
 	}
 	
+	@Scheduled(cron = "0 0 0 * * ?")
 	private void UpdateHistory() {
 		List<Likes> likes = likesRepsitory.findAll();
 		for(var like: likes) {
@@ -114,7 +114,7 @@ public class GoodsService {
 			switch (website) {
 				case JD -> {
 					try {
-						long gid = like.getJdGid();
+						long gid = like.getJdGoods().getGid();
 						double price = jdCrawler.GetPrice(gid, name);
 						List<History> historyList= historyRepository.findAllByJdGid(
 								gid,
@@ -131,7 +131,7 @@ public class GoodsService {
 				}
 				case TB -> {
 					try {
-						long gid = like.getTbGid();
+						long gid = like.getTbGoods().getGid();
 						double price = tbCrawler.GetPrice(gid);
 						List<History> historyList= historyRepository.findAllByTbGid(
 								gid,
