@@ -39,6 +39,11 @@ public class JDGoods implements Goods {
 		this.website = "JD";
 	}
 	
+	public JDGoods(long gid, double price) {
+		this.gid = gid;
+		this.price = price;
+	}
+	
 	@Override
 	public boolean OverDue() {
 		return (System.currentTimeMillis() - this.t > 3600000);

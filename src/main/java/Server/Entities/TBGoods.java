@@ -38,6 +38,12 @@ public class TBGoods implements Goods {
 		this.t = System.currentTimeMillis();
 		this.website = "TB";
 	}
+	
+	public TBGoods(long gid, double price) {
+		this.gid = gid;
+		this.price = price;
+	}
+	
 	@Override
 	public boolean OverDue() {
 		return (System.currentTimeMillis() - this.t > 3600000);

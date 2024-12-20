@@ -29,6 +29,8 @@ public class GoodsService {
 	private HistoryRepository historyRepository;
 	@Autowired
 	private LikesRepsitory likesRepsitory;
+	@Autowired
+	private EmailService emailService;
 	
 	TBCrawler tbCrawler = new TBCrawler();
 	JDCrawler jdCrawler = new JDCrawler();
@@ -105,9 +107,10 @@ public class GoodsService {
 		}
 	}
 	
-	@Scheduled(cron = "0 0 0 * * ?")
+	@Scheduled(cron = "0 0 8 * * ?")
 	private void UpdateHistory() {
 		List<Likes> likes = likesRepsitory.findAll();
+		boolean haveDiscount = false;
 		for(var like: likes) {
 			Utils.WebsiteType website = like.getWebsite();
 			String name = like.getName();
@@ -125,6 +128,14 @@ public class GoodsService {
 						{
 							historyRepository.save(new History(0, gid, price));
 						}
+						else if(historyList.get(0).getPrice() < price) {
+							// 降价提醒
+							String email = like.getUser().getEmail();
+							emailService.sendEmail(email,
+									"降价提醒",
+									"亲爱的用户：\n" +
+											"   您关注的商品降价啦，快去看看吧！");
+						}
 					} catch (Exception e) {
 						throw new RuntimeException(e);
 					}
@@ -140,6 +151,14 @@ public class GoodsService {
 								historyList.isEmpty() ||
 								historyList.get(0).getPrice() != price)
 						{
+							if(historyList.get(0).getPrice() < price) {
+								// 降价提醒
+								String email = like.getUser().getEmail();
+								emailService.sendEmail(email,
+										"降价提醒",
+										"亲爱的用户：\n" +
+												"   您关注的商品降价啦，快去看看吧！");
+							}
 							historyRepository.save(new History(gid, 0, price));
 						}
 					} catch (Exception e) {
@@ -147,7 +166,6 @@ public class GoodsService {
 					}
 				}
 			}
-			
 		}
 	}
 }

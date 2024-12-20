@@ -2,10 +2,12 @@ package Server.Service;
 
 import Server.Entities.*;
 import Server.Exception.UnAuthedException;
+import Server.Repository.HistoryRepository;
 import Server.Repository.JDRepository;
 import Server.Repository.LikesRepsitory;
 import Server.Repository.UserRepository;
 import Server.Utils.Utils;
+import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ public class UserService {
 	@Autowired
 	private LikesRepsitory likesRepsitory;
 	@Autowired
-	private GoodsService goodsService;
+	private HistoryRepository historyRepository;
 	
 	public User LoginService(Map<String, String> params) {
 		String username = params.get("username");
@@ -54,45 +56,55 @@ public class UserService {
 	public void AddLikesService(Map<String, Object> body) {
 		long uid = Long.parseLong(body.get("uid").toString());
 		long gid = Long.parseLong(body.get("gid").toString());
+		double price = Double.parseDouble(body.get("price").toString());
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
 		String name = body.get("name").toString();
 		switch (website) {
-			case JD -> likesRepsitory.save(new Likes(
+			case JD ->  {
+				likesRepsitory.save(new Likes(
 				new User(uid),
 				Utils.WebsiteType.JD,
 				name,
 				null,
 				new JDGoods(gid)
 			));
-			case TB -> likesRepsitory.save(new Likes(
+				historyRepository.save(new History(
+						0,
+						gid,
+						price
+				));
+			}
+			case TB -> {
+				likesRepsitory.save(new Likes(
 				new User(uid),
 				Utils.WebsiteType.TB,
 				"",
 				new TBGoods(gid),
 				null
 			));
+				historyRepository.save(new History(
+						gid,
+						0,
+						price
+				));
+			}
 		}
 	}
 	
+	@Transactional
 	public void RemoveLikesService(Map<String, Object> body) {
 		long uid = Long.parseLong(body.get("uid").toString());
 		long gid = Long.parseLong(body.get("gid").toString());
 		Utils.WebsiteType website = Utils.WebsiteType.fromString(body.get("website").toString());
 		switch (website) {
-			case JD -> likesRepsitory.delete(new Likes(
+			case JD -> likesRepsitory.deleteByUserAndJdGoods(
 					new User(uid),
-					Utils.WebsiteType.JD,
-					"",
-					null,
 					new JDGoods(gid)
-			));
-			case TB -> likesRepsitory.delete(new Likes(
+			);
+			case TB -> likesRepsitory.deleteByUserAndTbGoods(
 					new User(uid),
-					Utils.WebsiteType.TB,
-					"",
-					new TBGoods(gid),
-					null
-			));
+					new TBGoods(gid)
+			);
 		}
 	}
 	
