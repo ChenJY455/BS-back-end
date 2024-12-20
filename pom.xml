@@ -17,6 +17,28 @@
         <relativePath/>
     </parent>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.2.8</version>
+                <groupId>org.springframework.boot</groupId>
+                <configuration>
+                    <mainClass>Server.Main</mainClass>
+                    <layout>JAR</layout>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
