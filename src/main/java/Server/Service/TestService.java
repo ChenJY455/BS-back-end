@@ -61,7 +61,7 @@ public class TestService {
 		if(historyList != null &&
 				!historyList.isEmpty() &&
 				historyList.get(0).getPrice() != price) {
-			if(historyList.get(0).getPrice() < price) {
+			if(price < historyList.get(0).getPrice()) {
 				// 发送降价信息
 				for(Likes likes: likesList) {
 					User user = likes.getUser();

@@ -122,19 +122,19 @@ public class GoodsService {
 						List<History> historyList= historyRepository.findAllByJdGid(
 								gid,
 								Sort.by(Sort.Order.desc("t")));
-						if(historyList == null ||
-								historyList.isEmpty() ||
+						if(historyList != null &&
+								!historyList.isEmpty() &&
 								historyList.get(0).getPrice() != price)
 						{
+							if(price < historyList.get(0).getPrice()) {
+								// 降价提醒
+								String email = like.getUser().getEmail();
+								emailService.sendEmail(email,
+										"降价提醒",
+										"亲爱的用户：\n" +
+												"   您关注的商品降价啦，快去看看吧！");
+							}
 							historyRepository.save(new History(0, gid, price));
-						}
-						else if(historyList.get(0).getPrice() < price) {
-							// 降价提醒
-							String email = like.getUser().getEmail();
-							emailService.sendEmail(email,
-									"降价提醒",
-									"亲爱的用户：\n" +
-											"   您关注的商品降价啦，快去看看吧！");
 						}
 					} catch (Exception e) {
 						throw new RuntimeException(e);
@@ -147,11 +147,11 @@ public class GoodsService {
 						List<History> historyList= historyRepository.findAllByTbGid(
 								gid,
 								Sort.by(Sort.Order.desc("t")));
-						if(historyList == null ||
-								historyList.isEmpty() ||
+						if(historyList != null &&
+								!historyList.isEmpty() &&
 								historyList.get(0).getPrice() != price)
 						{
-							if(historyList.get(0).getPrice() < price) {
+							if(price < historyList.get(0).getPrice()) {
 								// 降价提醒
 								String email = like.getUser().getEmail();
 								emailService.sendEmail(email,
